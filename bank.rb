@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # bank
 class Bank
   attr_accessor :bet

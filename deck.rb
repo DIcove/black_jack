@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # deck
 class Deck
   attr_reader :cards

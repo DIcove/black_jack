@@ -1,22 +1,10 @@
+# frozen_string_literal: true
+
 require_relative 'requirable'
 
 # Game
-class Game
-  attr_reader :players, :user, :dealer, :deck, :bank, :bet
-
-  GREETINGS = 'Welcome to black jack, gl, hf'.freeze
-
-  OPTIONS = %w[
-    Pass
-    Take\ card\ from\ deck
-    Reveal\ cards
-  ].freeze
-
-  COMMANDS = {
-    1 => :pass,
-    2 => :take_card,
-    3 => :reveal_cards
-  }.freeze
+class Game # rubocop:todo Metrics/ClassLength
+  include UserInterface
 
   def initialize
     puts GREETINGS
@@ -25,15 +13,14 @@ class Game
     start_game
   end
 
+  private
+
+  attr_reader :players, :user, :dealer, :deck, :bank, :bet
+
   def initial_players
     @user = User.new(ask_name)
     @dealer = Dealer.new('dealer')
     players.push(user, dealer)
-  end
-
-  def ask_name
-    puts 'Enter your name...'
-    gets.chomp.strip
   end
 
   def reset_values
@@ -80,11 +67,6 @@ class Game
     show_menu
     show_options
     selection
-  end
-
-  def show_options
-    puts 'You can choose between options:'
-    OPTIONS.each.with_index(1) { |opt, i| puts "#{i}. #{opt}" }
   end
 
   def selection
@@ -135,7 +117,6 @@ class Game
 
   def max_cards?
     players.all? { |player| player.cards.size == 3 }
-    # user.cards == 3 && dealer.cards == 3
   end
 
   def determine_winner
@@ -146,8 +127,7 @@ class Game
 
     arr = [user_points, dealer_points].sort
     winner_points = arr[1] > 21 ? arr[0] : arr[1]
-    # winner_points = arr.all? > 21 ? arr.min : arr.max
-    puts winner_points == user_points ? user_won : dealer_won
+    winner_points == user_points ? user_won : dealer_won
   end
 
   def user_won

@@ -1,9 +1,6 @@
+# frozen_string_literal: true
+
 require_relative 'player'
 
 # user
-class User < Player
-  # # def initialize(name)
-  # #   @na
-  # #   super
-  # end
-end
+class User < Player; end
