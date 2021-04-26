@@ -13,7 +13,7 @@ class Deck
 
   def create_deck
     SYMBOLS.map do |symbol|
-      MASTS.map { |mast| symbol + mast }
+      MASTS.map { |mast| Card.new(symbol + mast) }
     end.flatten.shuffle
   end
 end

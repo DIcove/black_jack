@@ -4,33 +4,45 @@ require_relative 'requirable'
 
 # Game
 class Game # rubocop:todo Metrics/ClassLength
-  include UserInterface
-
   def initialize
-    puts GREETINGS
-    @players = []
+    @user_interface = UserInterface.new
     initial_players
     start_game
   end
 
   private
 
-  attr_reader :players, :user, :dealer, :deck, :bank, :bet
+  COMMANDS = {
+    1 => :pass,
+    2 => :take_card,
+    3 => :summarize
+  }.freeze
+
+  attr_reader :players, :user_hands, :dealer_hands, :user, :dealer, :deck, :bank, :bet, :user_interface, :hands
 
   def initial_players
-    @user = User.new(ask_name)
+    @user = User.new(user_interface.ask_name)
     @dealer = Dealer.new('dealer')
-    players.push(user, dealer)
+    @players = { user: user, dealer: dealer }
+    initial_hands
+  end
+
+  def initial_hands
+    @user_hands = UserHand.new(user)
+    @dealer_hands = DealerHand.new(dealer)
+    @hands = { user_hands: user_hands, dealer_hands: dealer_hands }
   end
 
   def reset_values
-    players.each do |player|
-      player.cards.clear
-      player.points = 0
-    end
-
+    reset_cards
     reset_deck
     reset_bank
+  end
+
+  def reset_cards
+    hands.each_value do |hand|
+      hand.cards.clear
+    end
   end
 
   def reset_bank
@@ -49,34 +61,28 @@ class Game # rubocop:todo Metrics/ClassLength
   end
 
   def make_bet
-    players.each { |player| player.make_bet(bank) }
+    players.each_value { |player| player.make_bet(bank) }
   end
 
   def first_move
-    players.sample.is_a?(User) ? user_turn : dealer_turn
+    players.values.sample.is_a?(User) ? user_turn : dealer_turn
   end
 
   def give_cards
     2.times do
-      players.each { |player| player.take_card(deck) }
+      hands.each_value { |hand| hand.take_card(deck) }
     end
   end
 
   def user_turn
-    reveal_cards if max_cards?
-    show_menu
-    show_options
+    summarize if max_cards?
+    user_interface.show_menu(hands)
     selection
   end
 
   def selection
-    command = gets.chomp.strip.to_i
+    command = user_interface.select_options
     send(COMMANDS[command])
-  end
-
-  def separation
-    15.times { print '=' }
-    puts
   end
 
   def pass
@@ -84,39 +90,30 @@ class Game # rubocop:todo Metrics/ClassLength
   end
 
   def take_card
-    if user.cards.size == 3
-      puts 'can\'t take more cards...'
+    if user_hands.cards.size == 3
+      user_interface.cards_limit_error
       user_turn
     else
-      user.take_card(deck)
+      user_hands.take_card(deck)
       dealer_turn
     end
   end
 
-  def reveal_cards
-    dealer.reveal_cards
-    separation
-    user.reveal_cards
-
+  def summarize
+    user_interface.reveal_cards(hands)
     determine_winner
     restart_game!
   end
 
-  def show_menu
-    dealer.hide_cards
-    separation
-    user.reveal_cards
-    reveal_cards if max_cards?
-  end
-
   def dealer_turn
-    reveal_cards if max_cards?
-    dealer.points >= 17 ? user_turn : dealer.take_card(deck)
-    show_menu
+    summarize if max_cards?
+    dealer_hands.take_card(deck) if dealer.points < 17
+    user_interface.show_menu(hands)
+    user_turn
   end
 
   def max_cards?
-    players.all? { |player| player.cards.size == 3 }
+    hands.values.all? { |hand| hand.cards.size == 3 }
   end
 
   def determine_winner
@@ -131,26 +128,23 @@ class Game # rubocop:todo Metrics/ClassLength
   end
 
   def user_won
-    puts "#{user.name} won!!!"
+    user_interface.winning_message(user)
     bank.return_cash(user, bank.bet)
-    puts user.cash
   end
 
   def dealer_won
-    puts 'dealer won!!!'
+    user_interface.winning_message(dealer)
     bank.return_cash(dealer, bank.bet)
-    puts dealer.cash
   end
 
   def draw
-    puts 'DRAW!'
+    user_interface.draw_message
     bank.return_cash(user, 10)
     bank.return_cash(dealer, 10)
   end
 
   def restart_game!
-    puts 'Wanna play again??? (yes/no)'
-    input = gets.chomp.strip
+    input = user_interface.ask_for_restart
     input.downcase.start_with?('y') ? start_game : exit!
   end
 end
