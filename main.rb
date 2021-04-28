@@ -76,7 +76,7 @@ class Game # rubocop:todo Metrics/ClassLength
 
   def user_turn
     summarize if max_cards?
-    user_interface.show_menu(hands)
+    user_interface.show_menu(players, hands)
     selection
   end
 
@@ -100,7 +100,7 @@ class Game # rubocop:todo Metrics/ClassLength
   end
 
   def summarize
-    user_interface.reveal_cards(hands)
+    user_interface.reveal_cards(players, hands)
     determine_winner
     restart_game!
   end
@@ -108,7 +108,7 @@ class Game # rubocop:todo Metrics/ClassLength
   def dealer_turn
     summarize if max_cards?
     dealer_hands.take_card(deck) if dealer.points < 17
-    user_interface.show_menu(hands)
+    user_interface.show_menu(players, hands)
     user_turn
   end
 

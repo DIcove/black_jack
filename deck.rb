@@ -5,16 +5,12 @@ class Deck
   attr_reader :cards
 
   def initialize
-    @cards = []
-    create_deck
-    p cards
+    @cards = create_deck
   end
 
   def create_deck
-    # SYMBOLS.map do |symbol|
-    #   MASTS.map { |mast| Card.new(symbol + mast) }
-    52.times do
-      cards << Card.new
-    end
+    Card::SYMBOLS.map do |symbol|
+      Card::SUITS.map { |suit| Card.new(symbol, suit) }
+    end.flatten.shuffle
   end
 end

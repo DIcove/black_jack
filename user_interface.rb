@@ -24,16 +24,24 @@ class UserInterface
     OPTIONS.each.with_index(1) { |opt, i| puts "#{i}. #{opt}" }
   end
 
-  def show_menu(hands)
-    puts hands[:dealer_hands].hide_cards
+  def show_menu(players, hands)
+    hide_cards(hands[:dealer_hands])
     separation
-    puts hands[:user_hands].reveal_cards
+    show_cards(players[:user], hands[:user_hands])
   end
 
-  def reveal_cards(hands)
-    puts hands[:dealer_hands].reveal_cards
+  def show_cards(player, hand)
+    puts "#{player.name} cards: #{hand.cards}, points #{player.points}"
+  end
+
+  def reveal_cards(players, hand)
+    show_cards(players[:user], hand[:user_hands])
     separation
-    puts hands[:user_hands].reveal_cards
+    show_cards(players[:user], hand[:user_hands])
+  end
+
+  def hide_cards(dealer_hand)
+    puts "Dealer cards: #{'*' * dealer_hand.cards.size}"
   end
 
   def select_options

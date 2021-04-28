@@ -28,7 +28,7 @@ class Hand
     end
   end
 
-  def reveal_cards
-    "#{player.name} cards: #{cards}, points #{player.points}"
-  end
+  # def reveal_cards
+  #   "#{player.name} cards: #{cards}, points #{player.points}"
+  # end
 end
